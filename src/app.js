@@ -10,6 +10,17 @@ app.use(cors());
 
 const repositories = [];
 
+// function validateProjectId(request, response, next) {
+//   const {id} = request.params;
+//   // se o ID não é válido (no formato UUID) retorna um erro
+//   if(!isUuid(id)) {
+//       return response.status(400).json({error: 'Invalid project ID.'});
+//   }
+//   return next();
+// }
+
+// function 
+
 app.get("/repositories", (request, response) => {
   return response.json(repositories);
 });
@@ -31,19 +42,20 @@ app.post("/repositories", (request, response) => {
 
 app.put("/repositories/:id", (request, response) => {
   const { id } = request.params;
-  const { title, url, techs } = request.body;
   const repositoryIndex = repositories.findIndex(repository => repository.id === id);
-
-  if (repositoryIndex < 0) {
+  
+  if (repositoryIndex === -1) {
     return response.status(400).json({ error: 'Repo not found' });
   }
 
+  const { title, url, techs } = request.body;
+  
 const repository = {
   id,
   title,
   url,
   techs,
-  likes: 0
+  likes: repositories[repositoryIndex].likes
 }
 
 repositories[repositoryIndex] = repository;
@@ -54,7 +66,7 @@ app.delete("/repositories/:id", (request, response) => {
   const { id } = request.params;
   const repositoryIndex = repositories.findIndex(repository => repository.id === id);
 
-  if (repositoryIndex < 0) {
+  if (repositoryIndex === -1) {
     return response.status(400).json({ error: 'Repo not found' });
   }
 
@@ -64,15 +76,15 @@ app.delete("/repositories/:id", (request, response) => {
 
 app.post("/repositories/:id/like", (request, response) => {
   const { id } = request.params;
-  const repository = repositories.find(repository => repository.id === id);
+  const repositoryIndex = repositories.findIndex(repository => repository.id === id);
 
-  if (!repository) {
+  if (repositoryIndex === -1) {
     return response.status(400).send();
   }
 
-  repository.likes += 1;
+  repositories[repositoryIndex].likes += 1;
 
-  return response.json(repository);
+  return response.json(repositories[repositoryIndex]);
 });
 
 module.exports = app;
